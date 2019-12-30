@@ -10,7 +10,7 @@ int main(){
     cin >> row1;
     cout << "Введите количество столбцов первой матрицы: ";
     cin >> col1;
-    cout << "Введите количество строк второй матрицы: ";
+    cout << "Введите количество элементов вектора: ";
     cin >> row2;
     
     if (col1 != row2)
@@ -32,9 +32,9 @@ int main(){
         }
     }
     
-    // Ввод элементов второй матрицы
+    // Ввод элементов вектора
     b = new double [row2];
-    cout << "Введите элементы второй матрицы" << endl;
+    cout << "Введите элементы вектора" << endl;
     for (int i = 0; i < row2; i++)
     {
         cout << "b[" << i << "]";
@@ -52,29 +52,29 @@ int main(){
         }
     int count=1;
     do{
-        runtime = omp_get_wtime();
+        runtime = omp_get_wtime()*1000;
         #pragma omp parallel for shared (a,b,cs) num_threads(count)
         for(int i=0;i<row1;++i){
             for(int j=0;j<col1;++j){
                 #pragma omp atomic
-                cs[i]=cs[i] + a[i][j]*b[j];
+                cs[i]+= a[i][j]*b[j];
             }
         }
-        runtime = omp_get_wtime()-runtime;   
+        runtime = omp_get_wtime()*1000-runtime;   
         cout<<count<<" threads, lines time is "<<runtime<<endl;     
 
-        runtime = omp_get_wtime();
+        runtime = omp_get_wtime()*1000;
         #pragma omp parallel for shared (a,b,cc) num_threads(count)
         for(int j=0;j<col1;++j){
             for(int i=0;i<row2;++i){
                 #pragma omp atomic
-                cc[i]=cc[i] + a[i][j]*b[j];
+                cc[i]+= a[i][j]*b[j];
             }
         }
-        runtime = omp_get_wtime()-runtime;
+        runtime = omp_get_wtime()*1000-runtime;
         cout<<count<<" threads, columns time is "<<runtime<<endl;
 
-        runtime = omp_get_wtime();
+        runtime = omp_get_wtime()*1000;
         int bh = row2 / count;
         int bw = col1 / count;
         #pragma omp parallel shared(a, b, cb) num_threads(count)
@@ -87,8 +87,8 @@ int main(){
                     #pragma omp atomic
                     cb[ii] += a[ii][jj] * b[jj];
         }
-        runtime = omp_get_wtime()-runtime;
-        cout<<count<<" threads, blocks time is "<<runtime<<endl;
+        runtime = omp_get_wtime()*1000-runtime;
+        cout<<count<<" threads, blocks time is "<<runtime*1000<<endl;
 
     }while(count<omp_get_thread_num());
     return 0;
